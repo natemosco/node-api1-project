@@ -20,11 +20,21 @@ server.get("/users/:id", (req, res) => {
   let id = req.body.id;
   db.findById(id)
     .then(singleUser => {
-      res.status(200).json(singleUser);
+      if (singleUser) {
+        res.status(200).json(singleUser);
+      } else {
+        res
+          .status(404)
+          .json({
+            errorMessage: "The user with the specified ID does not exist."
+          });
+      }
     })
     .catch(error => {
       console.log("error from /user/:id", error);
-      res.status(404).json({ message: "id not found" });
+      res
+        .status(500)
+        .json({ errorMessage: "The user information could not be retrieved." });
     });
 });
 
@@ -40,20 +50,16 @@ server.post("/users", (req, res) => {
           })
           .catch(error => {
             console.log("error within post return", error);
-            res
-              .status(500)
-              .json({
-                errorMessage: "Server Error - error in posting new user"
-              });
+            res.status(500).json({
+              errorMessage: "Server Error - error in posting new user"
+            });
           })
       )
       .catch(error => {
         console.log("error from post /users", error);
-        res
-          .status(500)
-          .json({
-            errorMessage: "Server Error - error adding user to database"
-          });
+        res.status(500).json({
+          errorMessage: "Server Error - error adding user to database"
+        });
       });
   } else {
     res
@@ -80,25 +86,41 @@ server.delete("/users/:id", (req, res) => {
     })
     .catch(errror => {
       console.log("error on DELETE /users/:id", error);
-      res.status(500).json({ errorMessage: "error removing this user " });
+      res.status(500).json({ errorMessage: "The user could not be removed" });
     });
 });
 
 server.put("/users/:id", (req, res) => {
+  if (!(req.body.name && req.body.bio))
+    res
+      .status(400)
+      .json({
+        errorMessage: "Bad Request -- Please provide name and bio for the user."
+      });
   const id = req.body.id;
   const update = req.body;
 
   db.update(id, update)
     .then(user => {
-      db.findById(id).then(singleUser => {
-        db.find().then(all => {
-          res.status(200).json({ modified: singleUser, data: all });
+      if (user) {
+        db.findById(id).then(singleUser => {
+          db.find().then(all => {
+            res.status(200).json({ modified: singleUser, data: all });
+          });
         });
-      });
+      } else {
+        res
+          .status(404)
+          .json({
+            errorMessage: "The user with the specified ID does not exist."
+          });
+      }
     })
     .catch(error => {
       console.log("error in put /users/:id", error);
-      res.status(404).json({ errorMessage: "error editing this user" });
+      res
+        .status(500)
+        .json({ errorMessage: "The user information could not be modified" });
     });
 });
 
