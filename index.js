@@ -15,3 +15,8 @@ server.get("/", (req, res) => {
       res.status(500).json({ errorMessage: "error from get / request" });
     });
 });
+
+const port = 345912;
+server.listen(port, () =>
+  console.log(`\n ** API running on port ${port} **\n`);
+);
