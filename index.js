@@ -29,23 +29,29 @@ server.get("/users/:id", (req, res) => {
 });
 
 server.post("/users", (req, res) => {
-  const newUser = req.body;
-  db.insert(newUser)
-    .then(
-      db
-        .find()
-        .then(all => {
-          res.status(201).json(all);
-        })
-        .catch(error => {
-          console.log("error within post return", error);
-          res.status(500).json({ errorMessage: "error in posting new user" });
-        })
-    )
-    .catch(error => {
-      console.log("error from post /users", error);
-      res.status(500).json({ errorMessage: "error adding user to database" });
-    });
+  if (req.body.name && req.body.bio) {
+    const newUser = req.body;
+    db.insert(newUser)
+      .then(
+        db
+          .find()
+          .then(all => {
+            res.status(201).json(all);
+          })
+          .catch(error => {
+            console.log("error within post return", error);
+            res.status(500).json({ errorMessage: "error in posting new user" });
+          })
+      )
+      .catch(error => {
+        console.log("error from post /users", error);
+        res.status(500).json({ errorMessage: "error adding user to database" });
+      });
+  } else {
+    res
+      .status(400)
+      .json({ errorMessage: "Please provide name and bio for the user" });
+  }
 });
 
 server.delete("/users/:id", (req, res) => {
