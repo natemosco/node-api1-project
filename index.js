@@ -36,16 +36,24 @@ server.post("/users", (req, res) => {
         db
           .find()
           .then(all => {
-            res.status(201).json(all);
+            res.status(201).json({ data: all, newUser: all[all.length - 1] });
           })
           .catch(error => {
             console.log("error within post return", error);
-            res.status(500).json({ errorMessage: "error in posting new user" });
+            res
+              .status(500)
+              .json({
+                errorMessage: "Server Error - error in posting new user"
+              });
           })
       )
       .catch(error => {
         console.log("error from post /users", error);
-        res.status(500).json({ errorMessage: "error adding user to database" });
+        res
+          .status(500)
+          .json({
+            errorMessage: "Server Error - error adding user to database"
+          });
       });
   } else {
     res
